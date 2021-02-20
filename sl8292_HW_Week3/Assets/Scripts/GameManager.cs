@@ -13,16 +13,23 @@ public class GameManager : MonoBehaviour
 
     private int score = 0;
 
-    const string DIR_LOGS = "/Logs";
+    // chase the file in Logs
+    const string FILE_CURRENTLEVEL = DIR_LOGS + "/currentLevel.txt";
     const string FILE_SCORES = DIR_LOGS + "/highScore.txt";
     const string FILE_ALL_SCORES = DIR_LOGS + "/allScores.csv";
+    const string DIR_LOGS = "/Logs";
+
+    // string to store the file path
+    string FILE_PATH_CURRENT_LEVEL;
     string FILE_PATH_HIGH_SCORES;
     string FILE_PATH_ALL_SCORES;
 
     public int CurrentLevel
     {
         get { return currentLevel; }
-        set { currentLevel = value; }
+        set {
+                currentLevel = value;
+            }
     }
 
     public int Score
@@ -114,6 +121,7 @@ public class GameManager : MonoBehaviour
     {
         FILE_PATH_HIGH_SCORES = Application.dataPath + FILE_SCORES;
         FILE_PATH_ALL_SCORES  = Application.dataPath + FILE_ALL_SCORES;
+        FILE_PATH_CURRENT_LEVEL = Application.dataPath + FILE_CURRENTLEVEL;
     }
 
     // Update is called once per frame
