@@ -29,6 +29,13 @@ public class GameManager : MonoBehaviour
         get { return currentLevel; }
         set {
                 currentLevel = value;
+                if (!File.Exists(FILE_PATH_CURRENT_LEVEL))
+                {
+                    Directory.CreateDirectory(Application.dataPath + DIR_LOGS);
+                    //File.Create(FILE_PATH_HIGH_SCORES);
+                }
+
+                File.WriteAllText(FILE_PATH_CURRENT_LEVEL, currentLevel + "");
             }
     }
 
@@ -97,9 +104,8 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    int targetScore = 3;
-
-    int currentLevel = 0;
+    public int targetScore = 0;
+    int currentLevel = 1;
 
     public Text text;  //TextMesh Component to tell you the time and the score
     
@@ -129,14 +135,14 @@ public class GameManager : MonoBehaviour
     {
 
         //update the text with the score and level
-        text.text = "Level:" + currentLevel + 
+        text.text = "Level:" + CurrentLevel + 
                     "\nScore: " + score + " Target: " + targetScore +
                     "\nHigh Score: " + HighScore;
         
         if (score == targetScore)  //if the current score == the targetScore
         {
-            currentLevel++; //increase the level number
-            SceneManager.LoadScene(currentLevel); //go to the next level
+            CurrentLevel++; //increase the level number
+            SceneManager.LoadScene(CurrentLevel); //go to the next level
             targetScore += 1; //update target score
         }
     }
