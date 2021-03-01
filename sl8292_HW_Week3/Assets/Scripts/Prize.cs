@@ -23,7 +23,7 @@ public class Prize : MonoBehaviour
         
         transform.position = new Vector2( //teleport to a random location
             Random.Range(-5,5),
-            Random.Range(-5,5));
+            Random.Range(-3.5f,3.5f));
 
         GameManager.instance.Score++; //increase the player's score using the Singleton!
         

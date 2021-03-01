@@ -32,7 +32,8 @@ public class MenuManager : MonoBehaviour
             File.WriteAllText(FILE_PATH_CURRENT_LEVEL, 1 + "");
         }
         GameManager.instance.targetScore = GameManager.instance.CurrentLevel + 2;
-        SceneManager.LoadScene(GameManager.instance.CurrentLevel);
+        SceneManager.LoadScene(GameManager.instance.CurrentLevel + 1);
+        GameManager.instance.isGame = true;
     }
     
     // read file and load to the saved level
@@ -50,5 +51,17 @@ public class MenuManager : MonoBehaviour
         }
         GameManager.instance.targetScore = GameManager.instance.CurrentLevel + 2;
         SceneManager.LoadScene(GameManager.instance.CurrentLevel);
+        GameManager.instance.isGame = true;
+    }
+    
+    public void Restart()
+    {
+        GameManager.instance.isGame = false;
+        GameManager.instance.isOver = false;
+        SceneManager.LoadScene(0);
+        GameManager.instance.timer = 0;
+        GameManager.instance.Score = 0;
+        GameManager.instance.targetScore = 0;
+        GameManager.instance.CurrentLevel = 0;
     }
 }

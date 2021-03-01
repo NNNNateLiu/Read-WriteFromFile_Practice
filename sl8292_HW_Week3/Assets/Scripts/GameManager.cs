@@ -24,6 +24,10 @@ public class GameManager : MonoBehaviour
     string FILE_PATH_HIGH_SCORES;
     string FILE_PATH_ALL_SCORES;
 
+    public bool isGame = false;
+    public bool isOver = false;
+    public float gameTime = 20;
+    public float timer = 0;
     public int CurrentLevel
     {
         get { return currentLevel; }
@@ -39,18 +43,13 @@ public class GameManager : MonoBehaviour
             }
     }
 
+    private List<int> highScores;
     public int Score
     {
         get { return score; }
         set
         {
             score = value;
-
-            //Debug.Log("Someone set the Score!");
-            if (score > HighScore)
-            {
-                HighScore = score;
-            }
 
             string fileContents = "";
             if (File.Exists(FILE_PATH_ALL_SCORES))
@@ -65,47 +64,9 @@ public class GameManager : MonoBehaviour
     }
 
     const string PREF_KEY_HIGH_SCORE = "HighScoreKey";
-    int highScore = -1;
-
-    public int HighScore
-    {
-        get
-        {
-            if (highScore < 0)
-            {
-                //highScore = PlayerPrefs.GetInt(PREF_KEY_HIGH_SCORE, 3);
-                if (File.Exists(FILE_PATH_HIGH_SCORES))
-                {
-                    string fileContents = File.ReadAllText(FILE_PATH_HIGH_SCORES);
-                    highScore = Int32.Parse(fileContents);
-                }
-                else
-                {
-                    highScore = 3;
-                }
-            }
-
-            return highScore;
-        }
-        set
-        {
-            highScore = value;
-            Debug.Log("New High Score!!!");
-            Debug.Log("File Path: " + FILE_PATH_HIGH_SCORES);
-            //PlayerPrefs.SetInt(PREF_KEY_HIGH_SCORE, highScore);
-
-            if (!File.Exists(FILE_PATH_HIGH_SCORES))
-            {
-                Directory.CreateDirectory(Application.dataPath + DIR_LOGS);
-                //File.Create(FILE_PATH_HIGH_SCORES);
-            }
-
-            File.WriteAllText(FILE_PATH_HIGH_SCORES, highScore + "");
-        }
-    }
 
     public int targetScore = 0;
-    int currentLevel = 1;
+    int currentLevel = 0;
 
     public Text text;  //TextMesh Component to tell you the time and the score
     
@@ -128,22 +89,108 @@ public class GameManager : MonoBehaviour
         FILE_PATH_HIGH_SCORES = Application.dataPath + FILE_SCORES;
         FILE_PATH_ALL_SCORES  = Application.dataPath + FILE_ALL_SCORES;
         FILE_PATH_CURRENT_LEVEL = Application.dataPath + FILE_CURRENTLEVEL;
+        
+        if (highScores == null)
+        {
+            highScores = new List<int>();
+            
+            string fileContents = File.ReadAllText(FILE_PATH_HIGH_SCORES);
+
+            string[] fileScores = fileContents.Split(',');
+
+            for (var i = 0; i < fileScores.Length - 1; i++)
+            {
+                highScores.Add(Int32.Parse(fileScores[i]));
+            }
+        }
     }
 
     // Update is called once per frame
     void Update()
-    {
-
-        //update the text with the score and level
-        text.text = "Level:" + CurrentLevel + 
-                    "\nScore: " + score + " Target: " + targetScore +
-                    "\nHigh Score: " + HighScore;
-        
-        if (score == targetScore)  //if the current score == the targetScore
+    { 
+        // press start or continue, enter the game
+        if (isGame && !isOver)
         {
-            CurrentLevel++; //increase the level number
-            SceneManager.LoadScene(CurrentLevel); //go to the next level
-            targetScore += 1; //update target score
+            timer += Time.deltaTime;
+            //update the text with the score and level
+            text.text = "Time:" + (int) (gameTime - timer) +
+                        "Level:" + CurrentLevel +
+                        "\nScore: " + score + " Target: " + targetScore +
+                        "\nHigh Score: " + highScores[0];
+        
+            if (score == targetScore)  //if the current score == the targetScore
+            {
+                CurrentLevel++; //increase the level number
+                SceneManager.LoadScene(CurrentLevel); //go to the next level
+                targetScore += 2; //update target score
+                if (CurrentLevel >= 7)
+                {
+                    isOver = true;
+                    isGame = false;
+                }
+            }
         }
+        
+        // enter over scene
+        if(!isGame && isOver)
+        {
+            Debug.Log("show highscores");
+            string highScoreString = "High Scores \n";
+
+            for (var i = 0; i < highScores.Count; i++)
+            {
+                //show in UI text
+                highScoreString += highScores[i] + "\n";
+            }
+
+            text.text = highScoreString;
+        }
+        
+        // time is up
+        if (gameTime < timer && isGame)
+        {
+            Debug.Log("update!");
+            isOver = true;
+            SceneManager.LoadScene(7);
+            isGame = false;
+            UpdateHighScore();
+        }
+    }
+    
+    void UpdateHighScore()
+    {
+        if (highScores == null)
+        {
+            highScores = new List<int>();
+
+            string fileContents = File.ReadAllText(FILE_PATH_HIGH_SCORES);
+
+            string[] fileScores = fileContents.Split(',');
+
+            for (var i = 0; i < fileScores.Length - 1; i++)
+            {
+                highScores.Add(Int32.Parse(fileScores[i]));
+            }
+        }
+
+        for (var i = 0; i < highScores.Count; i++)
+        {
+            if (Score > highScores[i])
+            {
+                highScores.Insert(i,Score);
+                break;
+            }
+        }
+
+        string saveHighScoreString = "";
+        for (var i = 0; i < highScores.Count; i++)
+        {
+            saveHighScoreString += highScores[i] + ",";
+        }
+        if (!File.Exists(FILE_PATH_HIGH_SCORES))
+        {
+            Directory.CreateDirectory(Application.dataPath + DIR_LOGS);
+        }
+        File.WriteAllText(FILE_PATH_HIGH_SCORES, saveHighScoreString);
     }
 }
